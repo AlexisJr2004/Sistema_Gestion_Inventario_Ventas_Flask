@@ -25,9 +25,6 @@ app.secret_key = os.urandom(24)
 app.config['SESSION_TYPE'] = 'filesystem'
 
 
-first_request = True
-
-
 def with_username(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -75,20 +72,6 @@ def login():
 
 # _____________________________________________________________________________________________________________________
 # RUTA PARA EL MANEJO DE LOS DATOS DE INICIO DE SESIÓN
-@app.before_request
-def load_session():
-    global first_request
-    if first_request:
-        user_id = session.get('user_id')
-        if user_id:
-            user_data = obtener_usuario_por_nombre(user_id)
-            if user_data:
-                session['user_data'] = user_data
-            else:
-                session.pop('user_id')
-        first_request = False
-
-
 @app.route('/login', methods=['POST', 'GET'])
 def login_post():
     if request.method == 'POST':
@@ -153,10 +136,6 @@ def obtener_id_de_usuario_actual():
 @app.route('/perfil_de_usuario', methods=['GET', 'POST'])
 @with_username
 def mostrar_perfil(username):
-    user_data = session.get('user_data')
-    if not user_data:
-        return redirect(url_for('login'))
-
     imagen_base64 = obtener_imagen_perfil_blob(username)
     datos_usuario = obtener_datos_usuario(username)  # Obtener los datos del usuario
 

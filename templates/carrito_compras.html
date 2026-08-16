@@ -1,203 +1,58 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>SGIV - Carrito de Compras </title>
-    <!-- Favicons -->
-    <link href="{{ url_for('static', filename='assets/img/favicon.png') }}" rel="icon">
-    <link href="{{ url_for('static', filename='assets/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
+{% extends "base.html" %}
+{% block title %}SGIV - Carrito de Compras{% endblock %}
 
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
-          rel="stylesheet">
-
-    <!-- Vendor CSS Files -->
-    <link href="{{ url_for('static', filename='assets/vendor/aos/aos.css') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='assets/vendor/glightbox/css/glightbox.min.css') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='assets/vendor/remixicon/remixicon.css') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='assets/vendor/swiper/swiper-bundle.min.css') }}" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-
-
-    <!-- Template Main CSS File -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles_carrito.css') }}">
-
-</head>
-<body>
-
-<header id="header" class="header fixed-top">
-    <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
-
-        <a href="{{ url_for('index') }}" class="logo d-flex align-items-center">
-            <img src="{{ url_for('static', filename='assets/img/logo.png') }}" alt="">
-            <span>SGIV</span>
-        </a>
-
-        <nav id="navbar" class="navbar">
-            <ul>
-                <li class="dropdown"><a href="#"><span>Gestion de Ventas</span> <i class="bi bi-chevron-down"></i></a>
-                    <ul>
-                        <li class="dropdown"><a href="#"><span>Gestionar productos</span> <i
-                                class="bi bi-chevron-right"></i></a>
-                            <ul>
-                                <li><a href="/registro_producto">Agregar productos</a></li>
-                                <li><a href="/gestion_inventario">Actualizar Inventario</a></li>
-                            </ul>
-                        </li>
-
-                        <li class="dropdown"><a href="#"><span>Visualizacion de datos</span> <i
-                                class="bi bi-chevron-right"></i></a>
-                            <ul>
-                                <li><a href="/productos_vendidos.html">Productos vendidos</a></li>
-                                <li><a href="/grafico_pastel">Graficos</a></li>
-                                <li><a href="/usuarios_registrados">Registro de clientes</a></li>
-
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
-
-                <li class="dropdown"><a href="#"><span>Gestion de Compras</span> <i class="bi bi-chevron-down"></i></a>
-                    <ul>
-                        <li><a href="/productos">Productos disponibles</a></li>
-                        <li><a href="/carrito_compras">Carro de compras<i
-                                class="fas fa-shopping-cart ml-2 fa-lg"></i></a></li>
-                        <li><a href="/productos_comprados">Productos comprados</a></li>
-                    </ul>
-                </li>
-
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                       data-bs-toggle="dropdown" aria-expanded="false">
-                        {% if imagen_base64 %}
-                        <!-- Imagen de perfil con tamaño personalizado -->
-                        <img src="data:image/jpeg;base64,{{ imagen_base64 }}" alt="Imagen de perfil"
-                             class="icon-large imagen_nav">
-                        {% else %}
-                        <!-- Si no hay imagen, puedes usar un icono predeterminado o una imagen por defecto -->
-                        <i class="fas fa-user-circle icon-large"></i>
-                        {% endif %}
-                        <br>
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="/perfil_de_usuario">{{ username }}</a></li>
-                        <!-- El enlace de cierre de sesión con una clase personalizada -->
-                        <li><a class="dropdown-item logout-link" href="{{ url_for('logout') }}">Cerrar sesión</a></li>
-                    </ul>
-                </li>
-
-            </ul>
-            <i class="bi bi-list mobile-nav-toggle"></i>
-        </nav><!-- .navbar -->    </div>
-</header>
-
-<section class="py-5">
-
-    <div class="header-content">
-        <div class="container px-4 px-lg-5 my-5">
-            <div class="text-center text-white">
-                <h1 data-aos="fade-up" data-aos-delay="400">CARRO DE COMPRAS</h1>
-                <h2 data-aos="fade-up" data-aos-delay="400">Selecciona los productos que desea comprar.</h2>
-            </div>
-        </div>
+{% block content %}
+<section class="bg-gradient-to-br from-brand-900 via-brand-800 to-brand-600 py-14">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
+        <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Carro de Compras</h1>
+        <p class="text-brand-100 mt-2">Selecciona los productos que deseas comprar.</p>
     </div>
+</section>
 
-    <div class="row">
-        <div class="col-lg-8 mx-auto">
-            <ul class="list-group mb-4">
-                {% for producto in productos %}
-                <li class="list-group-item">
-                    <div class="row align-items-center">
-                        <div class="col-auto imagen-container">
-                            <img src="data:image/jpeg;base64,{{ producto.imagen }}" alt="{{ producto.nombre }}"
-                                 class="imagen-pequena">
-                        </div>
-                        <div class="col">
-                            <h2>{{ producto.nombre }}</h2>
-                            <h4>ID: {{ producto.id }}</h4>
-                            <h4>Categoría: {{ producto.categoria }}</h4>
-                            <h4>Precio por unidad: ${{ producto.precio }}</h4>
-                            <h4>Cantidad: {{ producto.cantidad }}</h4>
-                            <h4>Precio total: ${{ '%.2f'|format(producto.precio_total) }}</h4>
-                            <!-- Agrega más detalles del producto según tu estructura de datos -->
-                        </div>
-
-                        <div class="col-auto">
-                            <div class="d-flex align-items-center">
-                                <button class="btn btn-danger me-2" onclick="eliminarDelCarrito('{{ producto.id }}')">
-                                    Eliminar <i class="fas fa-trash-alt ms-1"></i>
-                                </button>
-                                <button class="btn btn-primary" onclick="ajustarCantidad('{{ producto.id }}')">
-                                    Ajustar <i class="fas fa-adjust ms-1"></i>
-                                </button>
-
-                            </div>
-                        </div>
-                    </div>
-                </li>
-                {% endfor %}
-
-                <li class="list-group-item">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h4 class="text-muted mb-0">Precio de todos los productos:</h4>
-                        </div>
-                        <div>
-                            <h4 class="mb-0 font-weight-bold">$ {{ suma_total }}</h4>
-                        </div>
-                    </div>
-                </li>
-            </ul>
-            <div class="d-flex justify-content-center">
-                <button class="btn btn-success me-2" onclick="realizarCompra('{{ suma_total }}')">
-                    Comprar todo <i class="fas fa-shopping-cart ms-1"></i>
+<section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 pb-16">
+    <div class="bg-white rounded-2xl shadow-lg ring-1 ring-slate-100 divide-y divide-slate-100">
+        {% for producto in productos %}
+        <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+            <img src="data:image/jpeg;base64,{{ producto.imagen }}" alt="{{ producto.nombre }}"
+                 class="h-20 w-20 rounded-lg object-cover ring-1 ring-slate-200 shrink-0 mx-auto sm:mx-0">
+            <div class="flex-1 min-w-0">
+                <h2 class="font-semibold text-slate-800">{{ producto.nombre }}</h2>
+                <p class="text-xs text-slate-400 mt-0.5">ID: {{ producto.id }} · {{ producto.categoria }}</p>
+                <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600 mt-2">
+                    <span>Precio unitario: <strong class="text-slate-800">${{ producto.precio }}</strong></span>
+                    <span>Cantidad: <strong class="text-slate-800">{{ producto.cantidad }}</strong></span>
+                    <span>Total: <strong class="text-brand-700">${{ '%.2f'|format(producto.precio_total) }}</strong></span>
+                </div>
+            </div>
+            <div class="flex gap-2 shrink-0 justify-center sm:justify-end">
+                <button class="inline-flex items-center gap-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 text-sm font-medium px-3 py-2 transition"
+                        onclick="eliminarDelCarrito('{{ producto.id }}')">
+                    <i class="ri-delete-bin-line"></i> Eliminar
+                </button>
+                <button class="inline-flex items-center gap-1.5 rounded-lg bg-brand-50 text-brand-700 hover:bg-brand-100 text-sm font-medium px-3 py-2 transition"
+                        onclick="ajustarCantidad('{{ producto.id }}')">
+                    <i class="ri-equalizer-line"></i> Ajustar
                 </button>
             </div>
         </div>
-    </div>
+        {% endfor %}
 
-</section>
-
-<div class="hora-contenedor">
-    <p id="tiempo-actual">
-        <span id="time" class="time-text"></span>
-        <span id="ampm" class="ampm-text"></span>
-    </p>
-</div>
-<footer>
-    <div class="footer-content">
-        <div class="left-content">
-            <p><strong>Universidad Estatal de Milagro</strong> Todos los derechos reservados - UNEMI</p>
+        <div class="p-4 sm:p-5 flex items-center justify-between bg-slate-50 rounded-b-2xl">
+            <span class="text-sm font-medium text-slate-500">Precio de todos los productos</span>
+            <span class="text-xl font-bold text-brand-800">$ {{ suma_total }}</span>
         </div>
     </div>
-</footer>
 
+    <div class="flex justify-center mt-6">
+        <button class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm px-6 py-3 transition"
+                onclick="realizarCompra('{{ suma_total }}')">
+            <i class="ri-shopping-cart-2-line"></i> Comprar todo
+        </button>
+    </div>
+</section>
+{% endblock %}
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Mensaje Swal Alert con animación de círculo girando al cargar la página
-        Swal.fire({
-            title: 'Cargando...',
-            html: 'Por favor, espere...<br><br><div class="lds-dual-ring"></div>',
-            icon: 'info',
-            showConfirmButton: false,
-            onBeforeOpen: () => {
-                Swal.showLoading();
-            },
-        });
-        // Simula un tiempo de carga de 1 segundo después de que la página se cargue
-        setTimeout(() => {
-            Swal.close();
-        }, 1000);
-    });
-</script>
-
+{% block scripts %}
 <script>
     function eliminarDelCarrito(idProducto) {
         Swal.fire({
@@ -206,7 +61,7 @@
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
+            cancelButtonColor: '#2c3f87',
             confirmButtonText: 'Sí, eliminar'
         }).then((result) => {
             if (result.isConfirmed) {
@@ -225,7 +80,7 @@
                             data.message,
                             'success'
                         ).then(() => {
-                            location.reload(); // Actualizar la página después de eliminar
+                            location.reload();
                         });
                     })
                     .catch(error => {
@@ -238,7 +93,6 @@
             }
         });
     }
-
 </script>
 
 <script>
@@ -248,7 +102,7 @@
             text: `¿Está seguro que desea realizar la compra? El precio final es de: $${suma_total}`,
             icon: 'question',
             showCancelButton: true,
-            confirmButtonColor: '#3085d6',
+            confirmButtonColor: '#2c3f87',
             cancelButtonColor: '#d33',
             confirmButtonText: 'Sí, comprar'
         }).then((result) => {
@@ -260,7 +114,6 @@
                         if (!response.ok) {
                             throw new Error('Error al realizar la compra');
                         }
-                        // Actualizar la página después de realizar la compra
                         location.reload();
                     })
                     .catch(error => {
@@ -270,7 +123,6 @@
             }
         });
     }
-
 </script>
 
 <script>
@@ -278,7 +130,7 @@
         Swal.fire({
             title: 'Ajustar cantidad',
             input: 'number',
-            inputValue: cantidadActual, // Puedes mostrar la cantidad actual como valor predeterminado
+            inputValue: cantidadActual,
             inputAttributes: {
                 min: 1,
                 step: 1
@@ -312,76 +164,10 @@
                     'La cantidad del producto ha sido actualizada.',
                     'success'
                 ).then(() => {
-                    // Actualizar la página después de ajustar la cantidad
                     location.reload();
                 });
             }
         });
     }
-
 </script>
-
-<script>
-    function updateTime() {
-        const timeElement = document.getElementById('time');
-        const currentTime = new Date();
-        const hora = currentTime.getHours().toString().padStart(2, '0');
-        const minuto = currentTime.getMinutes().toString().padStart(2, '0');
-        const segundo = currentTime.getSeconds().toString().padStart(2, '0');
-
-        timeElement.innerHTML = `<strong>${hora}</strong>:<strong>${minuto}</strong>:<strong>${segundo}</strong>`;
-    }
-
-    // Actualiza la hora cada segundo
-    setInterval(updateTime, 500);
-    // Llama a updateTime para mostrar la hora inicial
-    updateTime();
-
-    function updateTime() {
-        const timeElement = document.getElementById('time');
-        const ampmElement = document.getElementById('ampm'); // Elemento para la referencia AM/PM
-        const currentTime = new Date();
-        let hours = currentTime.getHours();
-        let minutes = currentTime.getMinutes();
-        let seconds = currentTime.getSeconds();
-        let ampm = 'AM'; // Por defecto, asumimos que es AM
-        // Verifica si es PM y ajusta la referencia
-        if (hours >= 12) {
-            ampm = 'PM';
-            if (hours > 12) {
-                hours -= 12;
-            }
-        }
-        // Asegura que las horas, minutos y segundos tengan dos dígitos
-        hours = hours.toString().padStart(2, '0');
-        minutes = minutes.toString().padStart(2, '0');
-        seconds = seconds.toString().padStart(2, '0');
-        // Actualiza el contenido de los elementos
-        timeElement.innerHTML = `${hours}:${minutes}:${seconds}`;
-        ampmElement.innerHTML = ampm;
-    }
-
-    // Actualiza la hora cada segundo
-    setInterval(updateTime, 1000);
-    // Llama a updateTime para mostrar la hora inicial
-    updateTime();
-</script>
-
-<!-- Vendor JS Files -->
-<script src="{{ url_for('static', filename='assets/vendor/purecounter/purecounter_vanilla.js') }}"></script>
-<script src="{{ url_for('static', filename='assets/vendor/aos/aos.js') }}"></script>
-<script src="{{ url_for('static', filename='assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-<script src="{{ url_for('static', filename='assets/vendor/glightbox/js/glightbox.min.js') }}"></script>
-<script src="{{ url_for('static', filename='assets/vendor/isotope-layout/isotope.pkgd.min.js') }}"></script>
-<script src="{{ url_for('static', filename='assets/vendor/swiper/swiper-bundle.min.js') }}"></script>
-<script src="{{ url_for('static', filename='assets/vendor/php-email-form/validate.js') }}"></script>
-
-
-<!-- Template Main JS File -->
-<script src="{{ url_for('static', filename='assets/js/main.js') }}"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-</body>
-
-</html>
+{% endblock %}

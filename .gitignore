@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+flask_session/
+.idea/
+Base1
+Datos_de_Base1.xlsx

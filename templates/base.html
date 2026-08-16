@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SGIV{% endblock %}</title>
+
+    <link href="{{ url_for('static', filename='assets/img/logo.png') }}" rel="icon">
+    <link href="{{ url_for('static', filename='assets/img/logo.png') }}" rel="apple-touch-icon">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef1f9',
+                            100: '#dde3f3',
+                            200: '#b7c3e6',
+                            300: '#8fa1d8',
+                            400: '#5f78c2',
+                            500: '#3d54a5',
+                            600: '#2c3f87',
+                            700: '#23336c',
+                            800: '#1a2652',
+                            900: '#131c3f',
+                            950: '#0b1129',
+                        },
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        body { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-thumb { background: rgba(148,163,184,.5); border-radius: 999px; }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-800 antialiased md:flex">
+
+<div id="sidebar-backdrop" onclick="toggleSidebar(true)"
+     class="hidden opacity-0 fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300 md:hidden"></div>
+
+<aside id="sidebar"
+       class="fixed inset-y-0 left-0 z-50 w-72 -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out bg-white border-r border-slate-200 flex flex-col shadow-xl md:shadow-sm">
+    <div class="h-16 flex items-center gap-3 px-5 border-b border-slate-100 shrink-0">
+        <a href="{{ url_for('index') }}" class="flex items-center gap-3 min-w-0">
+            <img src="{{ url_for('static', filename='assets/img/logo.png') }}" alt="SGIV" class="h-9 w-9 rounded-xl ring-1 ring-slate-200 shrink-0">
+            <span class="text-brand-900 font-bold text-lg tracking-tight truncate">SGIV</span>
+        </a>
+        <button type="button" onclick="toggleSidebar(true)" class="ml-auto md:hidden text-slate-400 hover:text-slate-700 transition">
+            <i class="ri-close-line text-2xl"></i>
+        </button>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto px-3 py-5 space-y-6">
+        {% macro navlink(href, icon, label) -%}
+        <a href="{{ href }}"
+           class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
+                  {% if request.path == href %}bg-brand-50 text-brand-700{% else %}text-slate-600 hover:bg-slate-50 hover:text-brand-700{% endif %}">
+            <i class="{{ icon }} text-lg {% if request.path == href %}text-brand-600{% else %}text-slate-400{% endif %}"></i>
+            <span class="truncate">{{ label }}</span>
+            {% if request.path == href %}<span class="ml-auto h-1.5 w-1.5 rounded-full bg-brand-600"></span>{% endif %}
+        </a>
+        {%- endmacro %}
+
+        {{ navlink(url_for('index'), 'ri-home-4-line', 'Inicio') }}
+
+        <div>
+            <p class="px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Gestión de Ventas</p>
+            <div class="space-y-1">
+                {{ navlink('/registro_producto', 'ri-add-box-line', 'Agregar productos') }}
+                {{ navlink('/gestion_inventario', 'ri-archive-line', 'Actualizar Inventario') }}
+                {{ navlink('/productos_vendidos.html', 'ri-line-chart-line', 'Productos vendidos') }}
+                {{ navlink('/grafico_pastel', 'ri-pie-chart-2-line', 'Gráficos') }}
+                {{ navlink('/usuarios_registrados', 'ri-team-line', 'Registro de clientes') }}
+            </div>
+        </div>
+
+        <div>
+            <p class="px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Gestión de Compras</p>
+            <div class="space-y-1">
+                {{ navlink('/productos', 'ri-store-2-line', 'Productos disponibles') }}
+                {{ navlink('/carrito_compras', 'ri-shopping-cart-2-line', 'Carro de compras') }}
+                {{ navlink('/productos_comprados', 'ri-history-line', 'Productos comprados') }}
+            </div>
+        </div>
+    </nav>
+
+    <div class="p-3 border-t border-slate-100 shrink-0">
+        <div class="flex items-center gap-2 rounded-xl bg-slate-50 border border-slate-200 p-2">
+            <a href="/perfil_de_usuario" class="flex items-center gap-2.5 flex-1 min-w-0 rounded-lg px-1.5 py-1 hover:bg-white transition">
+                {% if imagen_base64 %}
+                <img src="data:image/jpeg;base64,{{ imagen_base64 }}" alt="Imagen de perfil" class="h-9 w-9 rounded-full object-cover ring-2 ring-white shrink-0">
+                {% else %}
+                <i class="ri-account-circle-line text-3xl text-slate-400 shrink-0"></i>
+                {% endif %}
+                <span class="text-sm font-medium text-slate-700 truncate">{{ username }}</span>
+            </a>
+            <a href="{{ url_for('logout') }}" title="Cerrar sesión"
+               class="shrink-0 h-9 w-9 flex items-center justify-center rounded-lg text-rose-500 hover:bg-rose-50 transition">
+                <i class="ri-logout-box-r-line text-lg"></i>
+            </a>
+        </div>
+    </div>
+</aside>
+
+<div class="flex-1 min-h-screen flex flex-col md:pl-72 min-w-0">
+    <header class="md:hidden sticky top-0 z-30 h-14 flex items-center gap-3 px-4 bg-white/80 backdrop-blur-xl border-b border-slate-200/80">
+        <button type="button" onclick="toggleSidebar()" class="text-slate-700 hover:text-brand-700 transition">
+            <i class="ri-menu-line text-2xl"></i>
+        </button>
+        <img src="{{ url_for('static', filename='assets/img/logo.png') }}" alt="SGIV" class="h-7 w-7 rounded-lg">
+        <span class="font-bold text-brand-900">SGIV</span>
+    </header>
+
+    <main class="flex-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="mt-auto bg-white border-t border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p class="text-xs text-center sm:text-left text-slate-500">
+                <strong class="text-slate-700">Universidad Estatal de Milagro</strong> · Todos los derechos reservados - UNEMI
+            </p>
+            <p class="flex items-center gap-2 text-xs font-mono tabular-nums bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg">
+                <i class="ri-time-line"></i>
+                <span id="time">--:--:--</span>
+                <span id="ampm" class="text-brand-600">--</span>
+            </p>
+        </div>
+    </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{{ url_for('static', filename='assets/js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

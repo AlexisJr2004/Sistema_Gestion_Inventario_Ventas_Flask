@@ -2,6 +2,7 @@ import base64
 import hashlib
 import os
 import sqlite3
+from contextlib import contextmanager
 from datetime import datetime
 from sqlite3 import Error
 
@@ -10,13 +11,17 @@ import pandas as pd
 
 # _____________________________________________________________________________________________________________________
 
+@contextmanager
 def obtener_conexion():
+    conexion = sqlite3.connect('Base1')
     try:
-        conexion = sqlite3.connect('Base1')
-        return conexion
-    except Exception as e:
-        print("Error al conectar con la base de datos:", e)
-        return None
+        yield conexion
+        conexion.commit()
+    except Exception:
+        conexion.rollback()
+        raise
+    finally:
+        conexion.close()
 
 
 # _____________________________________________________________________________________________________________________
@@ -37,7 +42,6 @@ def crear_tabla_usuarios():
             imagen_perfil BLOB
         )
     ''')
-    conexion.commit()
 
 
 def agregar_usuario(nombre, nombre_completo, cedula, correo, celular, contrasena):
@@ -307,12 +311,12 @@ def crear_tabla_carrito():
 
 def obtener_cantidad_en_carrito(id_usuario, id_producto):
     try:
-        conn = obtener_conexion()
-        cursor = conn.cursor()
+        with obtener_conexion() as conn:
+            cursor = conn.cursor()
 
-        cursor.execute('SELECT SUM(cantidad) FROM carrito WHERE id_usuario = ? AND id_producto = ?',
-                       (id_usuario, id_producto))
-        cantidad_en_carrito = cursor.fetchone()[0]
+            cursor.execute('SELECT SUM(cantidad) FROM carrito WHERE id_usuario = ? AND id_producto = ?',
+                           (id_usuario, id_producto))
+            cantidad_en_carrito = cursor.fetchone()[0]
 
         if cantidad_en_carrito is None:
             return 0
@@ -326,11 +330,11 @@ def obtener_cantidad_en_carrito(id_usuario, id_producto):
 
 def obtener_cantidad_disponible(id_producto):
     try:
-        conn = obtener_conexion()
-        cursor = conn.cursor()
+        with obtener_conexion() as conn:
+            cursor = conn.cursor()
 
-        cursor.execute('SELECT cantidad FROM productos WHERE id = ?', (id_producto,))
-        cantidad_disponible = cursor.fetchone()[0]
+            cursor.execute('SELECT cantidad FROM productos WHERE id = ?', (id_producto,))
+            cantidad_disponible = cursor.fetchone()[0]
 
         # Manejar el caso en que cantidad_disponible sea None
         if cantidad_disponible is None:
@@ -388,17 +392,17 @@ def agregar_al_carrito_db(id_usuario, id_producto, cantidad):
 
 def obtener_productos_del_carrito(id_usuario):
     try:
-        conn = obtener_conexion()
-        cursor = conn.cursor()
+        with obtener_conexion() as conn:
+            cursor = conn.cursor()
 
-        cursor.execute('''
-            SELECT p.id, p.nombre, p.categoria, p.imagen, p.precio, c.cantidad
-            FROM carrito c
-            JOIN productos p ON c.id_producto = p.id
-            WHERE c.id_usuario = ?
-        ''', (id_usuario,))
+            cursor.execute('''
+                SELECT p.id, p.nombre, p.categoria, p.imagen, p.precio, c.cantidad
+                FROM carrito c
+                JOIN productos p ON c.id_producto = p.id
+                WHERE c.id_usuario = ?
+            ''', (id_usuario,))
 
-        productos_carrito = cursor.fetchall()
+            productos_carrito = cursor.fetchall()
 
         productos_en_carrito = []
         for producto in productos_carrito:
@@ -415,7 +419,6 @@ def obtener_productos_del_carrito(id_usuario):
             }
             productos_en_carrito.append(producto_dict)
 
-        conn.close()
         return productos_en_carrito
 
     except Exception as e:
@@ -537,8 +540,10 @@ def importar_datos_excel(archivo_excel):
             for index, row in df.iterrows():
                 # Verificar si la columna de imagen es None o está vacía
                 imagen = row.get('imagen')
-                if pd.isnull(imagen) or imagen == '':
-                    # Si no hay imagen, asignar None
+                if isinstance(imagen, (bytes, bytearray)):
+                    imagen_bytes = imagen
+                else:
+                    # Si no hay imagen (o el valor no es binario), asignar None
                     imagen_bytes = None
 
                 # Insertar los datos en la base de datos
@@ -701,8 +706,8 @@ def actualizar_carrito_despues_de_actualizar_precio(product_id, nuevo_precio):
         with obtener_conexion() as conexion:
             cursor = conexion.cursor()
             cursor.execute(
-                "UPDATE carrito SET precio = (SELECT precio * cantidad FROM carrito WHERE id_producto = ?) WHERE id_producto = ?",
-                (product_id, product_id))
+                "UPDATE carrito SET precio = ? * cantidad WHERE id_producto = ?",
+                (nuevo_precio, product_id))
             conexion.commit()
         return {'message': 'Carrito actualizado después de actualizar el precio en productos'}
     except Exception as e:
@@ -934,7 +939,6 @@ def registrar_cliente(nombre, correo, telefono, direccion):
 
     return False
 
-
 # _____________________________________________________________________________________________________________________
 # PARA REGISTRO DE USUARIOS:
 
@@ -985,7 +989,6 @@ def buscar_usuarios(busqueda=None):
     except Exception as e:
         print(f"Error al buscar usuarios: {str(e)}")
         return []
-
 
 # _____________________________________________________________________________________________________________________
 # CREACION DE TABLAS
